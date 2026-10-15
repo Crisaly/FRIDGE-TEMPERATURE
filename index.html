@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fridge Temperature Control</title>
+<style>
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+margin: 0;
+padding: 16px;
+background-color: #f4f6f9;
+color: #333;
+}
+.card {
+max-width: 750px;
+margin: 0 auto 20px auto;
+background: #ffffff;
+padding: 20px;
+border-radius: 12px;
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h2, h3 {
+text-align: center;
+margin-top: 0;
+color: #1a252f;
+}
+h2 { font-size: 18px; }
+h3 { font-size: 16px; margin-bottom: 12px; border-bottom: 2px solid #3498db; padding-bottom: 6px; }
+.toggle-search-btn {
+width: 100%;
+max-width: 750px;
+display: block;
+margin: 0 auto 15px auto;
+padding: 12px;
+background-color: #2c3e50;
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 15px;
+font-weight: bold;
+cursor: pointer;
+text-align: center;
+}
+.form-group {
+margin-bottom: 15px;
+}
+label {
+display: block;
+font-weight: 600;
+font-size: 13px;
+margin-bottom: 5px;
+}
+select, input[type="text"], input[type="number"], input[type="date"] {
+width: 100%;
+padding: 10px;
+border: 1.5px solid #dcdfe6;
+border-radius: 6px;
+font-size: 14px;
+box-sizing: border-box;
+}
+select:focus, input:focus {
+border-color: #3498db;
+outline: none;
+}
+.row-grid {
+display: flex;
+gap: 10px;
+margin-bottom: 10px;
+}
+.row-grid .form-group {
+flex: 1;
+margin-bottom: 0;
+}
+.checkbox-group {
+display: flex;
+flex-direction: column;
+gap: 8px;
+margin-bottom: 15px;
+}
+.checkbox-container {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 10px;
+border-radius: 6px;
+cursor: pointer;
+}
+.checkbox-container input {
+width: 18px;
+height: 18px;
+cursor: pointer;
+}
+.checkbox-container label {
+margin: 0;
+font-weight: bold;
+cursor: pointer;
+}
+.defrost-box {
+background-color: #fff3cd;
+border: 1px solid #ffeeba;
+}
+.defrost-box label { color: #856404; }
+.broken-box {
+background-color: #f8d7da;
+border: 1px solid #f5c6cb;
+}
+.broken-box label { color: #721c24; }
+.scanner-btn {
+width: 100%;
+padding: 10px;
+background-color: #2980b9;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+margin-top: 6px;
+}
+.list-btn {
+width: 100%;
+padding: 10px;
+background-color: #16a085;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+margin-top: 6px;
+}
+.fridge-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 10px;
+padding: 12px;
+overflow-y: auto;
+}
+.fridge-item {
+padding: 16px 8px;
+background: #ecf0f1;
+border: 2px solid #dcdfe6;
+border-radius: 8px;
+font-size: 15px;
+font-weight: bold;
+cursor: pointer;
+text-align: center;
+}
+.fridge-item:active { background: #3498db; color: #fff; border-color: #2980b9; }
+.fridge-item.scanned { background: #f39c12; color: #fff; border-color: #d68910; }
+.fridge-item.scanned::after { content: " ✓"; }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.fridge-msg { padding: 20px; text-align: center; color: #7f8c8d; grid-column: 1 / -1; }
+.submit-btn {
+width: 100%;
+padding: 12px;
+background-color: #27ae60;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+}
+.search-btn {
+flex: 1;
+padding: 10px;
+background-color: #8e44ad;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+}
+.reset-btn {
+flex: 1;
+padding: 10px;
+background-color: #7f8c8d;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+}
+.recip-row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:1px solid #ecf0f1; cursor:pointer; font-size:15px; word-break:break-all; }
+.recip-row input { width:22px; height:22px; flex-shrink:0; cursor:pointer; }
+.recip-row:active { background:#eaf2f8; }
+.print-btn {
+width: 100%;
+padding: 10px;
+background-color: #16a085;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+margin-top: 10px;
+display: none;
+}
+.status-msg {
+margin-top: 15px;
+padding: 10px;
+border-radius: 6px;
+text-align: center;
+font-size: 14px;
+display: none;
+}
+.status-success { background-color: #d4edda; color: #155724; }
+.status-error { background-color: #f8d7da; color: #721c24; }
+.day-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 8px 0; }
+.day-bar .send-day-btn { margin: 0; flex: 1; }
+.day-chk { width: 26px; height: 26px; cursor: pointer; flex-shrink: 0; }
+.sel-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 12px 0; padding: 8px; background: #eaf2f8; border: 1px solid #aed6f1; border-radius: 8px; }
+.sel-bar label { margin: 0; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.sel-bar .send-day-btn { margin: 0; flex: 1; background-color: #1f618d; }
+.send-day-btn {
+width: 100%;
+padding: 10px;
+margin: 0 0 8px 0;
+background-color: #2980b9;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+}
+.send-day-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.send-day-btn.sent { background-color: #27ae60; }
+/* Styled Results Table */
+.results-table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 15px;
+font-size: 13px;
+background: #ffffff;
+border: 1px solid #dcdfe6;
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.results-table th, .results-table td {
+border: 1px solid #dcdfe6;
+padding: 10px 8px;
+text-align: center;
+}
+.results-table th {
+background-color: #2c3e50 !important;
+color: #ffffff !important;
+font-weight: bold;
+border-color: #3e5368;
+}
+.results-table tr:nth-child(even) { background-color: #fdfdfd; }
+/* Badges */
+.badge {
+display: inline-block;
+padding: 3px 8px;
+border-radius: 4px;
+font-weight: bold;
+font-size: 11px;
+color: #ffffff !important;
+text-transform: uppercase;
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.badge-defrost { background-color: #e67e22 !important; }
+.badge-broken { background-color: #e74c3c !important; }
+/* Modal Style */
+.modal {
+display: none;
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.7);
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+.modal-content {
+background: white; width: 90%; max-width: 500px; height: 80vh;
+border-radius: 8px; overflow: hidden; position: relative;
+display: flex; flex-direction: column;
+}
+.modal-header {
+padding: 10px 15px; background: #1a252f; color: white;
+display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header button {
+background: #e74c3c; border: none; color: white;
+padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
+}
+iframe { width: 100%; height: 100%; border: none; }
+/* PRINT STYLES */
+@media print {
+@page {
+size: A4 portrait;
+margin: 10mm;
+}
+body {
+background-color: #fff;
+padding: 0;
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.card:first-child, .toggle-search-btn, .row-grid, .search-btn, .reset-btn, .print-btn, .no-pdf, label, h3 {
+display: none !important;
+}
+#searchCard {
+display: block !important;
+box-shadow: none;
+border: none;
+width: 100%;
+max-width: 100%;
+padding: 0;
+margin: 0;
+}
+#printHeader {
+display: block !important;
+text-align: center;
+margin-bottom: 15px;
+}
+#printHeader h1 {
+font-size: 18px;
+margin: 0 0 5px 0;
+text-transform: uppercase;
+}
+#printHeader p {
+font-size: 12px;
+margin: 0;
+color: #555;
+}
+.results-table {
+width: 100%;
+font-size: 12px;
+border: 1px solid #2c3e50;
+}
+.results-table th, .results-table td {
+border: 1px solid #dcdfe6;
+padding: 8px 6px;
+}
+.results-table th {
+background-color: #2c3e50 !important;
+color: #ffffff !important;
+}
+}
+</style>
+</head>
+<body>
+<!-- ENTRY CARD -->
+<div class="card">
+<h2>FRIDGE TEMPERATURE LOGGING</h2>
+<div class="row-grid">
+<div class="form-group">
+<label for="daySelect">Select Day:</label>
+<select id="daySelect">
+<option value="MONDAY">MONDAY</option>
+<option value="TUESDAY">TUESDAY</option>
+<option value="WEDNESDAY">WEDNESDAY</option>
+<option value="THURSDAY">THURSDAY</option>
+<option value="FRIDAY">FRIDAY</option>
+<option value="SATURDAY">SATURDAY</option>
+<option value="SUNDAY">SUNDAY</option>
+</select>
+</div>
+<div class="form-group">
+<label for="typeSelect">Fridge Type (automatic):</label>
+<select id="typeSelect" disabled>
+<option value="CHILLED">CHILLED</option>
+<option value="FROZEN">FROZEN</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label for="barcodeInput">Fridge Barcode:</label>
+<input type="text" id="barcodeInput" placeholder="Scan or type (e.g. FRIDGE NO 1)">
+<button class="list-btn" onclick="openFridgeList()">📋 SELECT FRIDGE FROM LIST</button>
+</div>
+<div class="form-group">
+<label for="tempInput" id="tempLabel">Temperature (°C):</label>
+<input type="number" id="tempInput" step="0.1" placeholder="e.g. 3.5">
+</div>
+<div class="checkbox-group">
+<div class="checkbox-container defrost-box">
+<input type="checkbox" id="defrostCheck" onchange="toggleTempRequirement()">
+<label for="defrostCheck">❄️ DEFROSTING (Temperature not required)</label>
+</div>
+<div class="checkbox-container broken-box">
+<input type="checkbox" id="brokenCheck" onchange="toggleTempRequirement()">
+<label for="brokenCheck">⚠️ BROKEN (Temperature not required)</label>
+</div>
+</div>
+<button class="submit-btn" onclick="submitData()">SAVE</button>
+<div id="statusMsg" class="status-msg"></div>
+</div>
+<!-- TOGGLE SEARCH BUTTON -->
+<button class="toggle-search-btn" onclick="toggleSearchCard()">🔍 SEARCH & FILTERS (SHOW/HIDE)</button>
+<!-- SEARCH & FILTER CARD (HIDDEN BY DEFAULT) -->
+<div class="card" id="searchCard" style="display: none;">
+<h3>🔍 SEARCH & FILTERS</h3>
+<div class="row-grid">
+<div class="form-group">
+<label for="searchDay">By Day:</label>
+<select id="searchDay">
+<option value="">-- All --</option>
+<option value="MONDAY">MONDAY</option>
+<option value="TUESDAY">TUESDAY</option>
+<option value="WEDNESDAY">WEDNESDAY</option>
+<option value="THURSDAY">THURSDAY</option>
+<option value="FRIDAY">FRIDAY</option>
+<option value="SATURDAY">SATURDAY</option>
+<option value="SUNDAY">SUNDAY</option>
+</select>
+</div>
+<div class="form-group">
+<label for="searchFridge">By Fridge Barcode:</label>
+<input type="text" id="searchFridge" placeholder="e.g. FRIDGE NO 7">
+</div>
+</div>
+<label>Date Range (From - To):</label>
+<div class="row-grid">
+<div class="form-group">
+<input type="date" id="startDate">
+</div>
+<div class="form-group">
+<input type="date" id="endDate">
+</div>
+</div>
+<div class="row-grid">
+<button class="search-btn" onclick="runSearch()">SEARCH</button>
+<button class="reset-btn" onclick="resetSearch()">RESET</button>
+</div>
+<button id="printBtn" class="print-btn" onclick="openRecipients()">✉️ SELECT EMAIL RECIPIENTS</button>
+<div id="pdfLinkBox" style="margin-top:10px;text-align:center;"></div>
+<!-- Print Header -->
+<div id="printHeader" style="display: none;">
+<h1>FRIDGE TEMPERATURE CONTROL REPORT</h1>
+<p id="printSubHeader"></p>
+</div>
+<div id="searchResults"></div>
+</div>
+<!-- Camera Modal -->
+<!-- Fridge List Modal -->
+<div id="fridgeModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">
+<span>Select Fridge</span>
+<span><button id="newRoundBtn" style="background:#f39c12;margin-right:8px;" onclick="startNewRound()">NEW ROUND</button><button onclick="closeFridgeList()">X</button></span>
+</div>
+<div id="fridgeGrid" class="fridge-grid"></div>
+</div>
+</div>
+<!-- Recipients Modal -->
+<div id="recipModal" class="modal">
+<div class="modal-content" style="height:auto;max-height:80vh;max-width:420px;">
+<div class="modal-header">
+<span>Who receives the email?</span>
+<button onclick="closeRecipients()">X</button>
+</div>
+<div class="recip-row" style="background:#eaf2f8;font-weight:bold;" onclick="toggleAllRecipients()"><input type="checkbox" id="recipAll" onclick="event.stopPropagation();toggleAllRecipients()"><span>SELECT ALL</span></div>
+<div id="recipList" style="overflow-y:auto;flex:1;"></div>
+<div style="padding:12px;"><button class="submit-btn" onclick="closeRecipients()">DONE</button></div>
+</div>
+</div>
+<!-- ALL DONE popup -->
+<div id="doneModal" class="modal" style="z-index:2000;">
+<div class="modal-content" style="height:auto;max-width:360px;text-align:center;">
+<div id="doneHead" class="modal-header" style="justify-content:center;font-size:18px;"><span id="doneTitle">ALL DONE</span></div>
+<div style="padding:22px 18px;">
+<div id="doneIcon" style="font-size:60px;line-height:1;">&#9989;</div>
+<div id="doneText" style="font-size:16px;font-weight:bold;margin:14px 0 6px 0;"></div>
+<div id="doneSub" style="font-size:13px;color:#555;word-break:break-all;margin-bottom:18px;"></div>
+<button class="submit-btn" onclick="closeDone()">OK</button>
+</div></div></div>
+
+<!-- PIN Modal -->
+<div id="pinModal" class="modal">
+<div class="modal-content" style="height:auto;max-width:320px;">
+<div class="modal-header">
+<span>Enter PIN</span>
+<button onclick="closePin()">X</button>
+</div>
+<div style="padding:16px;">
+<input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="PIN" style="text-align:center;font-size:20px;letter-spacing:6px;" onkeydown="if(event.key==='Enter')checkPin()">
+<div id="pinMsg" style="color:#c0392b;font-size:13px;text-align:center;margin:8px 0;min-height:16px;"></div>
+<button class="submit-btn" onclick="checkPin()">CONTINUE</button>
+</div>
+</div>
+</div>
+<script>
+// ===== Connection to the Google Apps Script backend (Google Sheet + email) =====
+// PASTE the Web app URL (ends with /exec) between the quotes:
+const API_URL = "PASTE_YOUR_EXEC_URL_HERE";
+
+// Small replacement for google.script.run so the page works from GitHub Pages
+function makeRunner_(ok, fail) {
+  return new Proxy({}, {
+    get: function(_, name) {
+      if (name === "withSuccessHandler") return function(f) { return makeRunner_(f, fail); };
+      if (name === "withFailureHandler") return function(f) { return makeRunner_(ok, f); };
+      return function() {
+        const args = Array.prototype.slice.call(arguments);
+        fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },   // text/plain = no CORS preflight
+          body: JSON.stringify({ fn: String(name), args: args }),
+          redirect: "follow"
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(j) {
+          if (!j.ok) throw new Error(j.error || "Server error");
+          if (ok) ok(j.result);
+        })
+        .catch(function(err) { if (fail) fail(err); });
+      };
+    }
+  });
+}
+window.google = { script: { run: makeRunner_() } };
+
+// ===== "ALL DONE" popup =====
+function showReportPopup(rep) {
+  if (!rep || (rep.status !== "sent" && rep.status !== "failed")) return;
+  const ok = rep.status === "sent";
+  document.getElementById("doneHead").style.background = ok ? "#27ae60" : "#c0392b";
+  document.getElementById("doneTitle").innerText = ok ? "ALL DONE" : "ALL FRIDGES DONE";
+  document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : "&#9888;&#65039;";
+  document.getElementById("doneText").innerText = ok
+    ? "All fridges are complete and the email was sent."
+    : "All fridges are complete, but the email was NOT sent.";
+  document.getElementById("doneSub").innerText = ok ? ("Sent to: " + (rep.to || "")) : (rep.error || "Check the EMAIL sheet");
+  document.getElementById("doneModal").style.display = "flex";
+}
+function closeDone() { document.getElementById("doneModal").style.display = "none"; }
+window.onload = function() {
+const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+const today = new Date().getDay();
+document.getElementById("daySelect").value = days[today];
+};
+let searchPin = ""; // set after the correct PIN is entered
+function toggleSearchCard() {
+const searchCard = document.getElementById("searchCard");
+if (searchCard.style.display !== "none") { // hide and lock again
+searchCard.style.display = "none";
+searchPin = "";
+return;
+}
+document.getElementById("pinInput").value = "";
+document.getElementById("pinMsg").innerText = "";
+document.getElementById("pinModal").style.display = "flex";
+setTimeout(function() { document.getElementById("pinInput").focus(); }, 100);
+}
+function closePin() {
+document.getElementById("pinModal").style.display = "none";
+}
+function checkPin() {
+const v = document.getElementById("pinInput").value.trim();
+if (v === "1900") {
+searchPin = v;
+closePin();
+document.getElementById("searchCard").style.display = "block";
+} else {
+document.getElementById("pinMsg").innerText = "Wrong PIN";
+document.getElementById("pinInput").value = "";
+}
+}
+function toggleTempRequirement() {
+const isDefrosting = document.getElementById("defrostCheck").checked;
+const isBroken = document.getElementById("brokenCheck").checked;
+const tempInput = document.getElementById("tempInput");
+const tempLabel = document.getElementById("tempLabel");
+if (isDefrosting || isBroken) {
+tempInput.placeholder = "Optional (Defrosting/Broken)";
+tempLabel.innerText = "Temperature (°C) [Optional]:";
+} else {
+tempInput.placeholder = "e.g. 3.5";
+tempLabel.innerText = "Temperature (°C):";
+}
+}
+let fridgeCache = null;
+let serverKeys = {}; // fridges logged in the CURRENT round (from the sheet)
+let pendingKeys = {}; // scanned/selected but not saved yet
+let isSaving = false; // blocks double-save
+let lastScanCode = "", lastScanTime = 0;
+function fridgeKey(code) {
+const m = String(code || "").match(/(\d+)/);
+return m ? String(parseInt(m[1], 10)) : String(code || "").trim().toUpperCase();
+}
+function isDone(code) {
+const k = fridgeKey(code);
+return !!(serverKeys[k] || pendingKeys[k]);
+}
+function markScanned(code) {
+if (code) pendingKeys[fridgeKey(code)] = true;
+}
+function loadRound() {
+google.script.run
+.withSuccessHandler(function(list) {
+serverKeys = {};
+(list || []).forEach(function(c) { serverKeys[fridgeKey(c)] = true; });
+if (fridgeCache) renderFridgeList(fridgeCache);
+})
+.getLoggedThisRound();
+}
+window.addEventListener("load", loadRound);
+let newRoundArmed = false;
+function startNewRound() {
+const btn = document.getElementById("newRoundBtn");
+if (!newRoundArmed) {
+newRoundArmed = true;
+btn.innerText = "TAP AGAIN TO CONFIRM";
+setTimeout(function() { newRoundArmed = false; btn.innerText = "NEW ROUND"; }, 3000);
+return;
+}
+newRoundArmed = false;
+btn.innerText = "NEW ROUND";
+serverKeys = {}; pendingKeys = {};
+if (fridgeCache) renderFridgeList(fridgeCache);
+google.script.run
+.withSuccessHandler(function() { loadRound(); })
+.startNewRound();
+}
+function openFridgeList() {
+document.getElementById("fridgeModal").style.display = "flex";
+loadRound();
+if (fridgeCache) { renderFridgeList(fridgeCache); return; }
+const grid = document.getElementById("fridgeGrid");
+grid.innerHTML = "<div class='fridge-msg'>Loading...</div>";
+google.script.run
+.withSuccessHandler(function(list) {
+fridgeCache = list || [];
+renderFridgeList(fridgeCache);
+})
+.withFailureHandler(function(err) {
+grid.innerHTML = "<div class='fridge-msg' style='color:#c0392b;'>Could not load the list.</div>";
+})
+.getFridgeList();
+}
+function renderFridgeList(list) {
+const grid = document.getElementById("fridgeGrid");
+grid.innerHTML = "";
+if (!list.length) {
+grid.innerHTML = "<div class='fridge-msg'>No fridges found in BARCODE sheet.</div>";
+return;
+}
+list.forEach(function(item) {
+const code = item.code;
+const btn = document.createElement("button");
+btn.className = "fridge-item" + (isDone(code) ? " scanned" : "");
+btn.textContent = code;
+btn.onclick = function() { selectFridge(code); };
+grid.appendChild(btn);
+});
+}
+// Look the fridge up in the BARCODE list and set TYPE automatically
+function applyTypeFor(code) {
+const sel = document.getElementById("typeSelect");
+const k = fridgeKey(code);
+const item = (fridgeCache || []).find(function(f) { return fridgeKey(f.code) === k; });
+if (item && (item.type === "FROZEN" || item.type === "CHILLED")) {
+sel.value = item.type;
+sel.disabled = true; // type comes from the sheet
+} else {
+sel.disabled = false; // unknown fridge: choose manually
+}
+applyFrozenSign();
+}
+function loadFridgeCache(cb) {
+if (fridgeCache) { if (cb) cb(); return; }
+google.script.run
+.withSuccessHandler(function(list) { fridgeCache = list || []; if (cb) cb(); })
+.getFridgeList();
+}
+window.addEventListener("load", function() { loadFridgeCache(); });
+function selectFridge(code) {
+document.getElementById("barcodeInput").value = code;
+applyTypeFor(code);
+// stays white until a temperature is actually saved (see submitData)
+if (fridgeCache) renderFridgeList(fridgeCache);
+closeFridgeList();
+document.getElementById("tempInput").focus();
+}
+function closeFridgeList() {
+document.getElementById("fridgeModal").style.display = "none";
+}
+// Typed / hardware-scanner barcode: set the type (the card turns orange only after the temperature is saved)
+document.addEventListener("DOMContentLoaded", function() {
+document.getElementById("barcodeInput").addEventListener("change", function() {
+const code = this.value.trim();
+if (!code) return;
+loadFridgeCache(function() {
+applyTypeFor(code);
+renderFridgeList(fridgeCache);
+});
+document.getElementById("tempInput").focus();
+});
+});
+function applyFrozenSign() {
+const input = document.getElementById("tempInput");
+let v = input.value.trim().replace(",", ".");
+if (v !== "" && document.getElementById("typeSelect").value === "FROZEN") {
+const n = parseFloat(v);
+if (!isNaN(n) && n > 0) v = String(-n);
+}
+if (v !== input.value.trim()) input.value = v;
+return v;
+}
+document.addEventListener("DOMContentLoaded", function() {
+document.getElementById("tempInput").addEventListener("change", applyFrozenSign);
+document.getElementById("tempInput").addEventListener("blur", applyFrozenSign);
+document.getElementById("typeSelect").addEventListener("change", applyFrozenSign);
+});
+let saveQueue = [], queueRunning = false, lastSig = "", lastSigAt = 0;
+function showStatus(ok, msg) {
+const d = document.getElementById("statusMsg");
+d.className = "status-msg " + (ok ? "status-success" : "status-error");
+d.innerText = msg;
+d.style.display = "block";
+}
+function submitData() {
+const barcode = document.getElementById("barcodeInput").value.trim();
+applyTypeFor(barcode);
+const fridgeType = document.getElementById("typeSelect").value;
+const temp = applyFrozenSign();
+const isDefrosting = document.getElementById("defrostCheck").checked;
+const isBroken = document.getElementById("brokenCheck").checked;
+if (!barcode) { showStatus(false, "Please scan or enter the fridge barcode."); return; }
+if (!isDefrosting && !isBroken && temp === "") {
+showStatus(false, "Please enter temperature or select Defrosting / Broken.");
+return;
+}
+// ignore an accidental double press / double Enter
+const sig = barcode + "|" + temp + "|" + isDefrosting + "|" + isBroken;
+const now = Date.now();
+if (sig === lastSig && now - lastSigAt < 3000) return;
+lastSig = sig; lastSigAt = now;
+let notes = [];
+if (isDefrosting) notes.push("DEFROSTING");
+if (isBroken) notes.push("BROKEN");
+saveQueue.push({
+day: document.getElementById("daySelect").value,
+fridgeType: fridgeType,
+barcode: barcode,
+temperature: temp,
+isDefrosting: isDefrosting,
+isBroken: isBroken,
+label: barcode + " | " + fridgeType + " - " + (temp !== "" ? temp + "\u00b0C" : "N/A") + (notes.length ? " | " + notes.join(" & ") : ""),
+tries: 0
+});
+// instant feedback: ready for the next fridge straight away
+showStatus(true, "Saving... (" + barcode + ")");
+markScanned(barcode);
+if (fridgeCache) renderFridgeList(fridgeCache);
+document.getElementById("barcodeInput").value = "";
+document.getElementById("typeSelect").disabled = true;
+document.getElementById("tempInput").value = "";
+document.getElementById("defrostCheck").checked = false;
+document.getElementById("brokenCheck").checked = false;
+toggleTempRequirement();
+document.getElementById("barcodeInput").focus();
+runQueue();
+}
+function failItem(item) {
+saveQueue.shift();
+delete pendingKeys[fridgeKey(item.barcode)];
+if (fridgeCache) renderFridgeList(fridgeCache);
+showStatus(false, "NOT SAVED: " + item.label + " - please enter it again.");
+}
+function runQueue() {
+if (queueRunning || !saveQueue.length) return;
+queueRunning = true;
+const item = saveQueue[0];
+google.script.run
+.withSuccessHandler(function(r) {
+queueRunning = false;
+if (r && r.success) {
+saveQueue.shift();
+showStatus(!r.duplicate, r.duplicate
+? "Already saved a moment ago - duplicate ignored (" + item.barcode + ")"
+: (r.replaced ? "Updated \u2713 - temperature replaced (" : "Saved \u2713 (") + r.date + " " + r.time + " | " + item.label + ")");
+if (r.report) showReportPopup(r.report);
+} else {
+failItem(item);
+}
+runQueue();
+})
+.withFailureHandler(function() {
+queueRunning = false;
+item.tries++;
+if (item.tries >= 3) failItem(item);
+runQueue();
+})
+.recordTemperature(item);
+}
+window.addEventListener("beforeunload", function(e) {
+if (saveQueue.length) { e.preventDefault(); e.returnValue = ""; }
+});
+// ENTER in the temperature box = SAVE
+document.addEventListener("DOMContentLoaded", function() {
+document.getElementById("tempInput").addEventListener("keydown", function(ev) {
+if (ev.key === "Enter") { ev.preventDefault(); submitData(); }
+});
+});
+function runSearch() {
+const day = document.getElementById("searchDay").value;
+const fridge = document.getElementById("searchFridge").value;
+const startDate = document.getElementById("startDate").value;
+const endDate = document.getElementById("endDate").value;
+const resultsDiv = document.getElementById("searchResults");
+const printBtn = document.getElementById("printBtn");
+resultsDiv.innerHTML = "<p style='text-align:center;'>Searching...</p>";
+printBtn.style.display = "none";
+loadFridgeCache(function() {
+google.script.run
+.withSuccessHandler(function(results) {
+if (!results || results.length === 0) {
+resultsDiv.innerHTML = "<p style='text-align:center; color:#7f8c8d;'>No records found.</p>";
+return;
+}
+let html = buildDayReport(results, fridge.trim() !== "");
+resultsDiv.innerHTML = html;
+printBtn.style.display = "block";
+let subText = "Printed on: " + new Date().toLocaleDateString('en-GB');
+if (startDate || endDate) {
+subText += " | Date Range: " + (startDate || "...") + " to " + (endDate || "...");
+}
+document.getElementById("printSubHeader").innerText = subText;
+})
+.withFailureHandler(function(err) {
+resultsDiv.innerHTML = "<p style='text-align:center; color:red;'>Error during search.</p>";
+})
+.searchLogs({ day: day, fridge: fridge, startDate: startDate, endDate: endDate, pin: searchPin });
+});
+}
+// ===== Day-by-day report: one page per day, fridge 1,2,3... , MORNING then AFTERNOON =====
+function escHtml(s) {
+return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function dmyToMs(s) {
+const p = String(s).split("/");
+return p.length === 3 ? new Date(+p[2], +p[1] - 1, +p[0]).getTime() : 0;
+}
+function scanCells(entries, bg) {
+const TD = 'style="border:1px solid #999;padding:4px;font-size:10pt;text-align:center;background:' + bg + ';"';
+if (!entries.length) {
+return '<td ' + TD + '><span style="color:#aaa;">-</span></td><td ' + TD + '><span style="color:#aaa;">-</span></td>';
+}
+const first = entries[0];
+let tempHtml = "<b>" + escHtml(first.temp) + "</b>";
+if (first.defrost === "YES") tempHtml += '<br><span style="background:#e67e22;color:#fff;padding:1px 5px;font-weight:bold;font-size:8pt;">DEFROST</span>';
+if (first.broken === "YES") tempHtml += '<br><span style="background:#e74c3c;color:#fff;padding:1px 5px;font-weight:bold;font-size:8pt;">BROKEN</span>';
+let timeHtml = escHtml(first.time);
+for (let i = 1; i < entries.length; i++) { // extra scans in the same half of the day
+const x = entries[i];
+timeHtml += '<br><span style="color:#777;font-size:8pt;">+ ' + escHtml(x.time) + ' &nbsp;' + escHtml(x.temp) + '</span>';
+}
+return '<td ' + TD + '>' + timeHtml + '</td><td ' + TD + '>' + tempHtml + '</td>';
+}
+function buildDayReport(results, onlyFridgesWithData) {
+// group by date
+const days = {};
+results.forEach(function(r) { (days[r.date] = days[r.date] || []).push(r); });
+const dates = Object.keys(days).sort(function(a, b) { return dmyToMs(a) - dmyToMs(b); });
+// fridge order: 1, 2, 3 ...
+const known = {};
+(fridgeCache || []).forEach(function(f) { known[fridgeKey(f.code)] = { code: f.code, type: f.type }; });
+results.forEach(function(r) {
+const k = fridgeKey(r.fridge);
+if (!known[k]) known[k] = { code: r.fridge, type: r.type };
+});
+const sortedKeys = Object.keys(known).sort(function(a, b) {
+const na = parseInt(a, 10), nb = parseInt(b, 10);
+if (!isNaN(na) && !isNaN(nb)) return na - nb;
+return a < b ? -1 : a > b ? 1 : 0;
+});
+const TH = 'style="background:#2c3e50;color:#ffffff;border:1px solid #999;padding:5px;font-size:10pt;text-align:center;"';
+const THM = 'colspan="2" style="background:#d68910;color:#ffffff;border:1px solid #999;padding:5px;font-size:10pt;text-align:center;"';
+const THA = 'colspan="2" style="background:#2471a3;color:#ffffff;border:1px solid #999;padding:5px;font-size:10pt;text-align:center;"';
+let html = "";
+if (dates.length > 1) {
+html += '<div class="no-pdf sel-bar"><input type="checkbox" id="selAll" class="day-chk" onchange="toggleAllDays(this.checked)"><label for="selAll">ALL</label><button id="sendSelBtn" class="send-day-btn" onclick="sendSelectedDays()" disabled>\u2709\uFE0F SEND SELECTED DAYS (0)</button></div>';
+}
+dates.forEach(function(date, di) {
+const rows = days[date].slice().sort(function(a, b) { return a.time < b.time ? -1 : a.time > b.time ? 1 : 0; });
+const dayName = rows[0].day || "";
+html += '<div style="' + (di > 0 ? 'page-break-before:always;' : '') + 'margin-top:14px;">';
+html += '<h3 style="text-align:center;font-size:14pt;margin:0 0 8px 0;padding:6px;background:#ecf0f1;border:1px solid #999;">' + escHtml(dayName) + ' &nbsp;-&nbsp; ' + escHtml(date) + '</h3>';
+html += '<div class="no-pdf day-bar"><input type="checkbox" class="day-chk" data-date="' + escHtml(date) + '" onchange="updateSelCount()" title="Select day"><button class="send-day-btn" data-date="' + escHtml(date) + '" onclick="sendDayEmail(this)">\u2709\uFE0F SEND EMAIL (' + escHtml(dayName) + ' ' + escHtml(date) + ')</button></div>';
+html += '<table style="width:100%;border-collapse:collapse;"><thead>';
+html += '<tr><th ' + TH + ' rowspan="2">Fridge</th><th ' + TH + ' rowspan="2">Type</th><th ' + THM + '>MORNING</th><th ' + THA + '>AFTERNOON</th></tr>';
+html += '<tr><th style="background:#e6b35c;color:#000;border:1px solid #999;padding:3px;font-size:9pt;text-align:center;">Time</th><th style="background:#e6b35c;color:#000;border:1px solid #999;padding:3px;font-size:9pt;text-align:center;">Temp</th><th style="background:#7fb3d5;color:#000;border:1px solid #999;padding:3px;font-size:9pt;text-align:center;">Time</th><th style="background:#7fb3d5;color:#000;border:1px solid #999;padding:3px;font-size:9pt;text-align:center;">Temp</th></tr>';
+html += '</thead><tbody>';
+let shown = 0;
+sortedKeys.forEach(function(k) {
+const mine = rows.filter(function(r) { return fridgeKey(r.fridge) === k; });
+if (onlyFridgesWithData && !mine.length) return;
+const morning = mine.filter(function(r) { return r.time < "12:00:00"; });
+const afternoon = mine.filter(function(r) { return r.time >= "12:00:00"; });
+const bg = (shown++ % 2) ? "#f4f6f9" : "#ffffff";
+const f = known[k];
+html += '<tr><td style="border:1px solid #999;padding:4px;font-size:10pt;font-weight:bold;text-align:left;background:' + bg + ';">' + escHtml(f.code) + '</td>' +
+'<td style="border:1px solid #999;padding:4px;font-size:9pt;text-align:center;background:' + bg + ';">' + escHtml(f.type) + '</td>' +
+scanCells(morning, bg) + scanCells(afternoon, bg) + '</tr>';
+});
+html += '</tbody></table></div>';
+});
+return html;
+}
+// ===== email recipients (addresses come from the sheet named EMAIL) =====
+let emailList = null; // null = not loaded yet
+let selectedRecipients = {};
+function loadEmails(cb) {
+if (emailList) { if (cb) cb(); return; }
+google.script.run
+.withSuccessHandler(function(list) {
+emailList = list || [];
+emailList.forEach(function(e) { selectedRecipients[e] = true; }); // all ticked at the start
+updateRecipBtn();
+if (cb) cb();
+})
+.withFailureHandler(function() {
+emailList = [];
+updateRecipBtn();
+if (cb) cb();
+})
+.getEmailList();
+}
+window.addEventListener("load", function() { loadEmails(); });
+function chosenRecipients() {
+return (emailList || []).filter(function(e) { return selectedRecipients[e]; });
+}
+function updateRecipBtn() {
+const b = document.getElementById("printBtn");
+if (!b) return;
+const n = chosenRecipients().length;
+b.innerText = "\u2709\uFE0F EMAIL RECIPIENTS: " + n + " selected (tap to change)";
+}
+function renderRecipients() {
+const box = document.getElementById("recipList");
+box.innerHTML = "";
+if (!emailList || !emailList.length) {
+box.innerHTML = "<div class='fridge-msg'>No email addresses found in the sheet named EMAIL (column A, from row 2).</div>";
+} else {
+emailList.forEach(function(e) {
+const row = document.createElement("div");
+row.className = "recip-row";
+const cb = document.createElement("input");
+cb.type = "checkbox";
+cb.checked = !!selectedRecipients[e];
+cb.onclick = function(ev) { ev.stopPropagation(); selectedRecipients[e] = cb.checked; syncRecipAll(); updateRecipBtn(); };
+const sp = document.createElement("span");
+sp.textContent = e;
+row.onclick = function() { cb.checked = !cb.checked; selectedRecipients[e] = cb.checked; syncRecipAll(); updateRecipBtn(); };
+row.appendChild(cb); row.appendChild(sp);
+box.appendChild(row);
+});
+}
+syncRecipAll();
+}
+function syncRecipAll() {
+const all = document.getElementById("recipAll");
+all.checked = !!(emailList && emailList.length && chosenRecipients().length === emailList.length);
+}
+function toggleAllRecipients() {
+if (!emailList) return;
+const on = chosenRecipients().length !== emailList.length;
+emailList.forEach(function(e) { selectedRecipients[e] = on; });
+renderRecipients();
+updateRecipBtn();
+}
+function openRecipients() {
+document.getElementById("recipModal").style.display = "flex";
+document.getElementById("recipList").innerHTML = "<div class='fridge-msg'>Loading...</div>";
+loadEmails(renderRecipients);
+}
+function closeRecipients() {
+document.getElementById("recipModal").style.display = "none";
+}
+// returns the ticked addresses, or opens the popup when none is ticked
+function recipientsOrAsk() {
+const r = chosenRecipients();
+if (!r.length) {
+alert("Please select who will receive the email.");
+openRecipients();
+return null;
+}
+return r;
+}
+// ===== multi-day selection =====
+function selectedDates() {
+return Array.prototype.map.call(
+document.querySelectorAll("#searchResults .day-bar .day-chk:checked"),
+function(c) { return c.getAttribute("data-date"); });
+}
+function updateSelCount() {
+const n = selectedDates().length;
+const total = document.querySelectorAll("#searchResults .day-bar .day-chk").length;
+const btn = document.getElementById("sendSelBtn");
+if (btn) {
+btn.disabled = n === 0;
+btn.classList.remove("sent");
+btn.innerText = "\u2709\uFE0F SEND SELECTED DAYS (" + n + ")";
+}
+const all = document.getElementById("selAll");
+if (all) all.checked = total > 0 && n === total;
+}
+function toggleAllDays(on) {
+document.querySelectorAll("#searchResults .day-bar .day-chk").forEach(function(c) { c.checked = on; });
+updateSelCount();
+}
+function sendSelectedDays() {
+const dates = selectedDates();
+if (!dates.length) return;
+const recips = recipientsOrAsk();
+if (!recips) return;
+if (!confirm("Send ONE email with " + dates.length + " day(s) (a PDF for each) to:\n" + recips.join("\n") + "\n\nDays:\n" + dates.join("\n"))) return;
+const btn = document.getElementById("sendSelBtn");
+btn.disabled = true;
+btn.innerText = "SENDING...";
+google.script.run
+.withSuccessHandler(function(r) {
+if (r && r.success) {
+btn.disabled = false;
+btn.classList.add("sent");
+btn.innerText = "\u2713 SENT " + r.count + " day(s) to " + r.to;
+if (r.missing && r.missing.length) alert("No records for: " + r.missing.join(", "));
+} else {
+updateSelCount();
+alert("Not sent: " + ((r && r.error) || "unknown error"));
+}
+})
+.withFailureHandler(function(err) {
+updateSelCount();
+alert("Could not send the email. Please try again.");
+})
+.emailDayReports(dates, searchPin, recips);
+}
+// results without the SEND EMAIL buttons (used for the PDF / print)
+function cleanResultsHtml() {
+const tmp = document.createElement("div");
+tmp.innerHTML = document.getElementById("searchResults").innerHTML;
+tmp.querySelectorAll(".no-pdf").forEach(function(el) { el.remove(); });
+return tmp.innerHTML;
+}
+// Email the report (PDF attached) of one day
+function sendDayEmail(btn) {
+const date = btn.getAttribute("data-date");
+const recips = recipientsOrAsk();
+if (!recips) return;
+if (!confirm("Send the report for " + date + " (PDF attached) to:\n\n" + recips.join("\n"))) return;
+const original = btn.innerText;
+btn.disabled = true;
+btn.classList.remove("sent");
+btn.innerText = "SENDING...";
+google.script.run
+.withSuccessHandler(function(r) {
+btn.disabled = false;
+if (r && r.success) {
+btn.classList.add("sent");
+btn.innerText = "\u2713 SENT to " + r.to;
+} else {
+btn.innerText = original;
+alert("Not sent: " + ((r && r.error) || "unknown error"));
+}
+})
+.withFailureHandler(function(err) {
+btn.disabled = false;
+btn.innerText = original;
+alert("Could not send the email. Please try again.");
+})
+.emailDayReport(date, searchPin, recips);
+}
+function resetSearch() {
+document.getElementById("searchDay").value = "";
+document.getElementById("searchFridge").value = "";
+document.getElementById("startDate").value = "";
+document.getElementById("endDate").value = "";
+document.getElementById("searchResults").innerHTML = "";
+document.getElementById("printBtn").style.display = "none";
+}
+// Mobile-compatible printing via clean printable pop-up tab
+function printReport() {
+const resultsHtml = cleanResultsHtml();
+const printHeader = document.getElementById("printHeader").outerHTML;
+const printContent = `
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fridge Temperature Report</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: #333; }
+#printHeader { text-align: center; margin-bottom: 20px; display: block !important; }
+#printHeader h1 { font-size: 18px; margin: 0 0 5px 0; text-transform: uppercase; }
+#printHeader p { font-size: 12px; margin: 0; color: #555; }
+.results-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.results-table th, .results-table td { border: 1px solid #dcdfe6; padding: 8px; text-align: center; }
+.results-table th { background-color: #2c3e50 !important; color: #ffffff !important; font-weight: bold; }
+.results-table tr:nth-child(even) { background-color: #fdfdfd; }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; color: #fff !important; text-transform: uppercase; }
+.badge-defrost { background-color: #e67e22 !important; }
+.badge-broken { background-color: #e74c3c !important; }
+</style>
+</head>
+<body>
+${printHeader}
+${resultsHtml}
+</body>
+</html>
+`;
+// Opens in a new window/tab to trigger mobile print correctly
+const printWindow = window.open('', '_blank');
+if (printWindow) {
+printWindow.document.write(printContent);
+printWindow.document.close();
+printWindow.focus();
+setTimeout(function() {
+printWindow.print();
+}, 500);
+} else {
+// Fallback if popup is blocked
+window.print();
+}
+}
+</script>
+</body>
+</html>
