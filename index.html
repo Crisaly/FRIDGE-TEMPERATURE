@@ -393,6 +393,7 @@ button:focus-visible, .fridge-item:focus-visible { outline: 3px solid rgba(138,7
 .fridge-item:active { background: var(--p); border-color: var(--p2); }
 .fridge-item.scanned { background: linear-gradient(135deg,#1fc185,#14a56d); border-color: #12935f; }
 .recip-row { border-bottom: 1px solid var(--line); }
+.round-info { padding: 10px 16px; font-size: 13px; background: #f6f2fd; border-bottom: 1px solid var(--line); line-height: 1.5; }
 }
 </style>
 </head>
@@ -499,6 +500,7 @@ button:focus-visible, .fridge-item:focus-visible { outline: 3px solid rgba(138,7
 <span>Select Fridge</span>
 <span><button id="newRoundBtn" style="background:#f39c12;margin-right:8px;" onclick="startNewRound()">NEW ROUND</button><button onclick="closeFridgeList()">X</button></span>
 </div>
+<div id="roundInfo" class="round-info"></div>
 <div id="fridgeGrid" class="fridge-grid"></div>
 </div>
 </div>
@@ -641,12 +643,13 @@ function fridgeKey(code) {
 const m = String(code || "").match(/(\d+)/);
 return m ? String(parseInt(m[1], 10)) : String(code || "").trim().toUpperCase();
 }
+let localDone = lsGet("ld") || {}; // done marks kept in the browser until the round is finished
 function isDone(code) {
 const k = fridgeKey(code);
-return !!(serverKeys[k] || pendingKeys[k]);
+return !!(serverKeys[k] || pendingKeys[k] || localDone[k]);
 }
 function markScanned(code) {
-if (code) pendingKeys[fridgeKey(code)] = true;
+if (code) { pendingKeys[fridgeKey(code)] = true; localDone[fridgeKey(code)] = true; lsSet("ld", localDone); }
 }
 function loadRound() {
 google.script.run
@@ -670,7 +673,7 @@ return;
 }
 newRoundArmed = false;
 btn.innerText = "NEW ROUND";
-serverKeys = {}; pendingKeys = {}; lsSet("rk", {});
+serverKeys = {}; pendingKeys = {}; localDone = {}; lsSet("rk", {}); lsSet("ld", {});
 if (fridgeCache) renderFridgeList(fridgeCache);
 google.script.run
 .withSuccessHandler(function() { loadRound(); })
@@ -692,6 +695,9 @@ if (!list.length) {
 grid.innerHTML = "<div class='fridge-msg'>No fridges found in BARCODE sheet.</div>";
 return;
 }
+const left = list.filter(function(f) { return !isDone(f.code); });
+const info = document.getElementById("roundInfo");
+info.innerHTML = "<b>\u2713 " + (list.length - left.length) + " / " + list.length + " done</b>" + (left.length && left.length < list.length ? " &middot; <span style='color:#b3203a'>left: " + left.map(function(f) { return escHtml(f.code.replace(/^\D+/, "") || f.code); }).join(", ") + "</span>" : "");
 list.forEach(function(item) {
 const code = item.code;
 const btn = document.createElement("button");
@@ -782,7 +788,8 @@ function persistQ() { lsSet("q", saveQueue); updateSync(); }
 updateSync();
 function autoNewRound() { // all fridges done: clear the round automatically
 if (saveQueue.length) return;
-serverKeys = {}; pendingKeys = {}; lsSet("rk", {});
+if (fridgeCache && !fridgeCache.every(function(f) { return isDone(f.code); })) return; // only when EVERY fridge is done
+serverKeys = {}; pendingKeys = {}; localDone = {}; lsSet("rk", {}); lsSet("ld", {});
 if (fridgeCache) renderFridgeList(fridgeCache);
 google.script.run.withSuccessHandler(function() { loadRound(); }).startNewRound();
 }
@@ -838,7 +845,7 @@ runQueue();
 }
 function failItem(item) {
 saveQueue.shift(); persistQ();
-delete pendingKeys[fridgeKey(item.barcode)];
+delete pendingKeys[fridgeKey(item.barcode)]; delete localDone[fridgeKey(item.barcode)]; lsSet("ld", localDone);
 if (fridgeCache) renderFridgeList(fridgeCache);
 showStatus(false, "NOT SAVED: " + item.label + " - please enter it again.");
 }
