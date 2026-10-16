@@ -532,6 +532,23 @@ body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48
 <button class="submit-btn" onclick="closeDone()">OK</button>
 </div></div></div>
 
+<!-- TEMPERATURE popup (opens after scanning / selecting a fridge) -->
+<div id="tpModal" class="modal" style="z-index:2100;">
+<div class="modal-content" style="height:auto;max-width:380px;">
+<div class="modal-header" style="justify-content:center;font-size:17px;"><span>Enter temperature</span></div>
+<div style="padding:18px;text-align:center;">
+<div id="tpFridge" style="font-size:22px;font-weight:800;"></div>
+<div id="tpBadge" class="type-badge" style="margin:8px 0 0 0;"></div>
+<div id="tpTypeWrap" style="display:none;margin-top:12px;text-align:left;"><label for="tpType">Fridge Type:</label><select id="tpType"></select></div>
+<input type="text" id="tpTemp" inputmode="decimal" autocomplete="off" placeholder="e.g. 3.5" style="margin:14px 0 8px 0;font-size:34px;font-weight:800;text-align:center;padding:16px;">
+<div style="font-size:12px;color:#6e7591;margin-bottom:10px;">&deg;C</div>
+<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0;"><input type="checkbox" id="tpDefrost" style="width:20px;height:20px;"> DEFROSTING</label>
+<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0;"><input type="checkbox" id="tpBroken" style="width:20px;height:20px;"> BROKEN</label>
+<div id="tpErr" style="color:#b3203a;font-weight:700;font-size:13px;min-height:18px;margin:8px 0;"></div>
+<button class="submit-btn" onclick="tpSave()">SAVE</button>
+<button class="reset-btn" onclick="tpCancel()" style="width:100%;margin-top:10px;">CANCEL</button>
+</div></div></div>
+
 <!-- PIN Modal -->
 <div id="pinModal" class="modal">
 <div class="modal-content" style="height:auto;max-width:320px;">
@@ -547,6 +564,13 @@ body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48
 </div>
 </div>
 <script>
+// Google can return error messages in the language of the account (e.g. Greek): always show English
+function enErr(e) {
+e = String(e || "");
+if (!/[\u0370-\u03FF\u1F00-\u1FFF]/.test(e)) return e;
+if (/\u03BA\u03B5\u03BD\u03BF\u03CD/.test(e)) return "Cannot insert an empty text element (report PDF).";
+return "Google error (message was not in English). Check the Executions log in Apps Script.";
+}
 let testMode = false, realState = null, testStarting = false;
 // ===== browser cache (localStorage): instant start, offline-safe queue =====
 function lsGet(k) { try { return JSON.parse(localStorage.getItem("fridge_" + k)); } catch (e) { return null; } }
@@ -592,7 +616,7 @@ if (!rep.test) lsSet("sent", { date: todayKey(), status: rep.status, to: rep.to 
   document.getElementById("doneText").innerText = ok
     ? "All fridges are complete and the email was sent."
     : "All fridges are complete, but the email was NOT sent.";
-  document.getElementById("doneSub").innerText = ok ? ("Sent to: " + (rep.to || "")) : (rep.error || "Check the EMAIL sheet");
+  document.getElementById("doneSub").innerText = ok ? ("Sent to: " + (rep.to || "")) : enErr(rep.error || "Check the EMAIL sheet");
   if (rep.test) {
 document.getElementById("doneTitle").innerText = "TEST DONE";
 document.getElementById("doneText").innerText = ok ? "Test finished: the TEST email was sent and the test data was erased." : "Test finished but the test email was NOT sent.";
@@ -672,7 +696,7 @@ document.getElementById("doneHead").style.background = ok ? "#27ae60" : failed ?
 document.getElementById("doneTitle").innerText = "TODAY'S EMAIL";
 document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : failed ? "&#10060;" : "&#9203;";
 document.getElementById("doneText").innerText = ok ? "Today's email was SENT (" + rec.time + ")" : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
-document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to : failed ? (rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
+document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to : failed ? enErr(rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
 document.getElementById("doneModal").style.display = "flex";
 }
 window.addEventListener("load", function() { setTimeout(showTodayStatus, 300); });
@@ -835,7 +859,7 @@ applyTypeFor(code);
 // stays white until a temperature is actually saved (see submitData)
 if (fridgeCache) renderFridgeList(fridgeCache);
 closeFridgeList();
-document.getElementById("tempInput").focus();
+openTempPopup();
 }
 function closeFridgeList() {
 document.getElementById("fridgeModal").style.display = "none";
@@ -848,8 +872,14 @@ if (!code) return;
 loadFridgeCache(function() {
 applyTypeFor(code);
 renderFridgeList(fridgeCache);
+if (isKnownFridge(code)) openTempPopup();
 });
-document.getElementById("tempInput").focus();
+});
+document.getElementById("barcodeInput").addEventListener("keydown", function(ev) { // scanner / keyboard ENTER
+if (ev.key !== "Enter") return;
+ev.preventDefault();
+const code = this.value.trim();
+if (code) loadFridgeCache(function() { applyTypeFor(code); openTempPopup(); });
 });
 });
 function applyFrozenSign() {
@@ -1204,7 +1234,7 @@ btn.innerText = "\u2713 SENT " + r.count + " day(s) to " + r.to;
 if (r.missing && r.missing.length) alert("No records for: " + r.missing.join(", "));
 } else {
 updateSelCount();
-alert("Not sent: " + ((r && r.error) || "unknown error"));
+alert("Not sent: " + enErr((r && r.error) || "unknown error"));
 }
 })
 .withFailureHandler(function(err) {
@@ -1238,7 +1268,7 @@ btn.classList.add("sent");
 btn.innerText = "\u2713 SENT to " + r.to;
 } else {
 btn.innerText = original;
-alert("Not sent: " + ((r && r.error) || "unknown error"));
+alert("Not sent: " + enErr((r && r.error) || "unknown error"));
 }
 })
 .withFailureHandler(function(err) {
@@ -1299,6 +1329,50 @@ printWindow.print();
 window.print();
 }
 }
+let tpOpen = false;
+function isKnownFridge(c) { const k = fridgeKey(c); return !!(fridgeCache || []).find(function(f) { return fridgeKey(f.code) === k; }); }
+function openTempPopup() {
+if (tpOpen) return;
+const code = document.getElementById("barcodeInput").value.trim();
+if (!code) return;
+applyTypeFor(code);
+tpOpen = true;
+const sel = document.getElementById("typeSelect"), manual = !sel.disabled;
+document.getElementById("tpFridge").textContent = code;
+const badge = document.getElementById("typeBadge"), tb = document.getElementById("tpBadge");
+tb.className = badge.className; tb.textContent = badge.textContent; tb.style.display = manual ? "none" : "inline-flex";
+document.getElementById("tpTypeWrap").style.display = manual ? "block" : "none";
+if (manual) { document.getElementById("tpType").innerHTML = sel.innerHTML; document.getElementById("tpType").value = sel.value; }
+document.getElementById("tpTemp").value = document.getElementById("tempInput").value;
+document.getElementById("tpDefrost").checked = document.getElementById("defrostCheck").checked;
+document.getElementById("tpBroken").checked = document.getElementById("brokenCheck").checked;
+document.getElementById("tpErr").textContent = "";
+document.getElementById("tpModal").style.display = "flex";
+setTimeout(function() { const t = document.getElementById("tpTemp"); t.focus(); t.select(); }, 60);
+}
+function closeTempPopup() { document.getElementById("tpModal").style.display = "none"; tpOpen = false; }
+function tpCancel() { closeTempPopup(); document.getElementById("barcodeInput").focus(); }
+function tpSave() {
+const v = document.getElementById("tpTemp").value.trim().replace(",", ".");
+const d = document.getElementById("tpDefrost").checked, b = document.getElementById("tpBroken").checked;
+const err = document.getElementById("tpErr");
+if (!d && !b && v === "") { err.textContent = "Type the temperature (or tick Defrosting / Broken)"; return; }
+if (v !== "" && isNaN(Number(v))) { err.textContent = "That is not a valid number"; return; }
+const sel = document.getElementById("typeSelect");
+if (!sel.disabled) sel.value = document.getElementById("tpType").value;
+document.getElementById("tempInput").value = v;
+document.getElementById("defrostCheck").checked = d;
+document.getElementById("brokenCheck").checked = b;
+toggleTempRequirement();
+closeTempPopup();
+submitData();
+}
+document.addEventListener("DOMContentLoaded", function() {
+document.getElementById("tpTemp").addEventListener("keydown", function(ev) {
+if (ev.key === "Enter") { ev.preventDefault(); tpSave(); }
+else if (ev.key === "Escape") tpCancel();
+});
+});
 // keep the Google script "warm" (the first call after idle time is the slow one)
 function warmUp() { if (!document.hidden && !queueRunning) google.script.run.getLoggedThisRound(); }
 setInterval(warmUp, 4 * 60 * 1000);
