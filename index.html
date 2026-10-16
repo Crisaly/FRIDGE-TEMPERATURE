@@ -684,7 +684,7 @@ else { cls += " ready"; html = mailSending ? "&#9203; Sending the email..." : "&
 if (mailSending) { bar.className = cls; bar.innerHTML = html; bar.style.display = ""; return; }
 html += '<button onclick="sendEmailNow()"' + (mailSending ? " disabled" : "") + ">" + (mailSending ? "SENDING..." : "&#128231; " + (mailErr ? "TRY AGAIN" : label)) + "</button>";
 } else if (sentToday) {
-cls += " sent"; html = "&#9989; Today's email was SENT (" + escHtml(sent.time) + ") to " + escHtml(sent.to);
+html = ""; // no "email was SENT" line on the page anymore
 } else {
 html = "";
 }
