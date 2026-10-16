@@ -680,14 +680,15 @@ let cls = "mail-bar", html = "";
 if (isReady()) {
 const label = testMode ? "SEND TEST EMAIL" : "SEND EMAIL";
 if (mailErr) { cls += " failed"; html = "&#10060; Email NOT sent: " + escHtml(mailErr); }
-else { cls += " ready"; html = "&#9989; All fridges are complete &ndash; the email is NOT sent yet"; }
+else { cls += " ready"; html = mailSending ? "&#9203; Sending the email..." : "&#9989; All fridges are complete &ndash; the email is NOT sent yet"; }
+if (mailSending) { bar.className = cls; bar.innerHTML = html; bar.style.display = ""; return; }
 html += '<button onclick="sendEmailNow()"' + (mailSending ? " disabled" : "") + ">" + (mailSending ? "SENDING..." : "&#128231; " + (mailErr ? "TRY AGAIN" : label)) + "</button>";
 } else if (sentToday) {
 cls += " sent"; html = "&#9989; Today's email was SENT (" + escHtml(sent.time) + ") to " + escHtml(sent.to);
 } else {
-html = "&#128231; " + (testMode ? "TEST: " : "") + "Email NOT sent &ndash; the SEND EMAIL button appears when all fridges are complete";
+html = "";
 }
-bar.className = cls; bar.innerHTML = html;
+bar.className = cls; bar.innerHTML = html; bar.style.display = html ? "" : "none";
 }
 function sendEmailNow() {
 if (mailSending || !isReady()) return;
@@ -1027,7 +1028,7 @@ showStatus(!r.duplicate, r.duplicate
 : (r.replaced ? "Updated \u2713 - temperature replaced (" : "Saved \u2713 (") + r.date + " " + r.time + " | " + item.label + ")");
 if (r.report && r.report.status === "ready") { // everything is complete: NOTHING is sent automatically, the SEND EMAIL button appears
 markReady(!!item.test);
-if (!!item.test === testMode) setDonePopup("#27ae60", "ALL FRIDGES COMPLETE", "&#9989;", "Press the SEND EMAIL button to send the report.", "The email is NOT sent yet.");
+if (!!item.test === testMode) sendEmailNow(); // automatic, like before
 }
 else if (r.report) { showReportPopup(r.report); if (!!item.test === testMode) autoNewRound(); }
 } else {
