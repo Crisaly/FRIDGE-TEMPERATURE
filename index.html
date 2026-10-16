@@ -624,9 +624,44 @@ document.body.classList.remove("testing");
 if (fridgeCache) renderFridgeList(fridgeCache);
 loadRound();
 }
+let sendingPopup = false;
+function setDonePopup(bg, title, icon, text, sub) {
+document.getElementById("doneHead").style.background = bg;
+document.getElementById("doneTitle").innerText = title;
+document.getElementById("doneIcon").innerHTML = icon;
+document.getElementById("doneText").innerText = text;
+document.getElementById("doneSub").innerText = sub;
+document.getElementById("doneModal").style.display = "flex";
+}
+function startReportSend(item) {
+const test = !!(item && item.test), rec = test ? (item.recipients || []) : null;
+if (!test) lsSet("pr", { date: todayKey() }); // remembered until the email really went out
+setDonePopup("#e67e22", test ? "TEST: ALL FRIDGES DONE" : "ALL FRIDGES DONE", "&#9203;", "Sending the email...", "You can close this and keep working.");
+sendingPopup = true;
+google.script.run
+.withSuccessHandler(function(rep) {
+if (!test) lsSet("pr", null);
+if (rep && (rep.status === "sent" || rep.status === "failed")) showReportPopup(rep);
+else if (sendingPopup) closeDone();
+sendingPopup = false;
+if (test === testMode) autoNewRound();
+})
+.withFailureHandler(function() {
+sendingPopup = false;
+setDonePopup("#c0392b", "EMAIL NOT SENT YET", "&#9888;&#65039;", "Could not send the email now (no connection?)", test ? "Test email not sent." : "It will be sent automatically next time the app is opened with internet.");
+})
+.sendPendingReport(test, rec);
+}
+window.addEventListener("load", function() {
+const pr = lsGet("pr");
+if (pr && pr.date === todayKey()) setTimeout(function() { startReportSend(null); }, 600);
+else if (pr) lsSet("pr", null);
+});
 function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
 // popup when the app opens: was today's email sent or not?
 function showTodayStatus() {
+const pr = lsGet("pr"); if (pr && pr.date === todayKey()) return; // an email is still being sent
+
 const rec = lsGet("sent");
 const has = rec && rec.date === todayKey();
 const ok = has && rec.status === "sent";
@@ -920,7 +955,8 @@ saveQueue.shift(); persistQ();
 showStatus(!r.duplicate, r.duplicate
 ? "Already saved a moment ago - duplicate ignored (" + item.barcode + ")"
 : (r.replaced ? "Updated \u2713 - temperature replaced (" : "Saved \u2713 (") + r.date + " " + r.time + " | " + item.label + ")");
-if (r.report) { showReportPopup(r.report); if (!!item.test === testMode) autoNewRound(); }
+if (r.report && r.report.status === "ready") startReportSend(item); // the save is done; the email is sent in the background
+else if (r.report) { showReportPopup(r.report); if (!!item.test === testMode) autoNewRound(); }
 } else {
 failItem(item);
 }
