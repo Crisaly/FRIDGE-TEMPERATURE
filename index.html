@@ -616,7 +616,7 @@ window.google = { script: { run: makeRunner_() } };
 function showReportPopup(rep) {
   if (!rep || (rep.status !== "sent" && rep.status !== "failed")) return;
   const ok = rep.status === "sent";
-if (!rep.test) setTimeout(loadReportStatus, 500);
+if (!rep.test) lsSet("sent", { date: todayKey(), status: rep.status, to: rep.to || "", error: rep.error || "", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) });
   document.getElementById("doneHead").style.background = ok ? "#27ae60" : "#c0392b";
   document.getElementById("doneTitle").innerText = ok ? "ALL DONE" : "ALL FRIDGES DONE";
   document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : "&#9888;&#65039;";
@@ -666,31 +666,16 @@ document.getElementById("doneText").innerText = text;
 document.getElementById("doneSub").innerText = sub;
 document.getElementById("doneModal").style.display = "flex";
 }
-let readyReal = false, readyTest = false, mailSending = false, mailErr = "";
-let srv = null; // today's status from the SERVER (same on every device)
-function loadReportStatus(cb) {
-  google.script.run
-  .withSuccessHandler(function(st) {
-    srv = st || null;
-    if (srv && !testMode) { readyReal = !!srv.ready && !srv.sent; }
-    renderMailBar();
-    if (cb) cb();
-  })
-  .withFailureHandler(function() { if (cb) cb(); })
-  .getReportStatus();
-}
-window.addEventListener("load", function() { loadReportStatus(); });
-setInterval(function() { if (!document.hidden && !mailSending) loadReportStatus(); }, 30000);
-document.addEventListener("visibilitychange", function() { if (!document.hidden) loadReportStatus(); });
+let readyReal = (function() { const r = lsGet("rdy"); return !!(r && r.date === todayKey()); })(), readyTest = false, mailSending = false, mailErr = "";
 function isReady() { return testMode ? readyTest : readyReal; }
 function markReady(test) {
-if (test) readyTest = true; else readyReal = true;
+if (test) readyTest = true; else { readyReal = true; lsSet("rdy", { date: todayKey() }); }
 mailErr = "";
 renderMailBar();
 }
 function renderMailBar() {
 const bar = document.getElementById("mailBar"); if (!bar) return;
-const sent = srv && srv.sent && srv.info && srv.info.status === "sent" ? srv.info : null, sentToday = !testMode && !!sent;
+const sent = lsGet("sent"), sentToday = !testMode && sent && sent.date === todayKey() && sent.status === "sent";
 let cls = "mail-bar", html = "";
 if (isReady()) {
 const label = testMode ? "SEND TEST EMAIL" : "SEND EMAIL";
@@ -713,19 +698,19 @@ google.script.run
 mailSending = false;
 rep = rep || { status: "none" };
 if (rep.status === "sent") {
-if (test) readyTest = false; else readyReal = false;
+if (test) readyTest = false; else { readyReal = false; lsSet("rdy", null); }
 showReportPopup(rep);
 if (test === testMode) autoNewRound();
 } else if (rep.status === "failed") {
 mailErr = enErr(rep.error || "Check the EMAIL sheet");
 showReportPopup(rep);
 } else if (rep.status === "already") {
-readyReal = false; loadReportStatus();
+readyReal = false; lsSet("rdy", null);
 setDonePopup("#27ae60", "ALREADY SENT", "&#9989;", "Today's email was already sent.", "");
 } else if (rep.status === "sending") {
 setDonePopup("#e67e22", "PLEASE WAIT", "&#9203;", "The email is being sent right now.", "");
 } else {
-if (test) readyTest = false; else readyReal = false;
+if (test) readyTest = false; else { readyReal = false; lsSet("rdy", null); }
 setDonePopup("#c0392b", "EMAIL NOT SENT", "&#10060;", "Not all fridges are complete yet.", "Finish the round first, then press SEND EMAIL.");
 }
 renderMailBar();
@@ -740,19 +725,18 @@ window.addEventListener("load", function() { lsSet("pr", null); renderMailBar();
 function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
 // popup when the app opens: was today's email sent or not?
 function showTodayStatus() {
-loadReportStatus(function() { renderTodayPopup(); });
-}
-function renderTodayPopup() {
-if (!srv) { return; } // no connection: show nothing wrong, the green/orange bar still updates later
-const info = srv.info || null;
-const ok = !!srv.sent && info && info.status === "sent";
-const failed = !srv.sent && info && info.status === "failed";
-const done = srv.done || 0, total = srv.total || 0;
+
+const rec = lsGet("sent");
+const has = rec && rec.date === todayKey();
+const ok = has && rec.status === "sent";
+const failed = has && rec.status === "failed";
+const total = fridgeCache ? fridgeCache.length : 0;
+const done = fridgeCache ? fridgeCache.filter(function(f) { return isDone(f.code); }).length : 0;
 document.getElementById("doneHead").style.background = ok ? "#27ae60" : failed ? "#c0392b" : "#e67e22";
 document.getElementById("doneTitle").innerText = "TODAY'S EMAIL";
 document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : failed ? "&#10060;" : "&#9203;";
-document.getElementById("doneText").innerText = ok ? "Today's email was SENT" + (info.time ? " (" + info.time + ")" : "") : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
-document.getElementById("doneSub").innerText = ok ? "Sent to: " + (info.to || "") : failed ? enErr(info.error || "Check the EMAIL sheet") : (srv.ready ? "All fridges are complete - press SEND EMAIL" : (total ? done + " of " + total + " fridges done in this round" : ""));
+document.getElementById("doneText").innerText = ok ? "Today's email was SENT (" + rec.time + ")" : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
+document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to : failed ? enErr(rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
 document.getElementById("doneModal").style.display = "flex";
 }
 window.addEventListener("load", function() { setTimeout(showTodayStatus, 300); });
