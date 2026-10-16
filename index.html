@@ -349,7 +349,13 @@ color: #ffffff !important;
 }
 }
 
-@media print { .app-header, .entry-card { display: none !important; } }
+@media print { .app-header, .entry-card, .mail-bar, .mail-bar { max-width: 750px; margin: 0 auto 14px; padding: 14px 16px; border-radius: 18px; font-size: 14px; font-weight: 700; background: #ece9f6; color: #5a6180; }
+.mail-bar.sent { background: #e0f6ec; color: #0b7a4e; }
+.mail-bar.ready { background: #fff0d1; color: #8a5200; border: 2px solid #f0b44c; }
+.mail-bar.failed { background: #ffe8ec; color: #b3203a; border: 2px solid #f0a0ae; }
+.mail-bar button { display: block; width: 100%; margin-top: 10px; padding: 15px; border: 0; border-radius: 14px; font-size: 17px; font-weight: 800; color: #fff; background: linear-gradient(135deg,#f5a623,#e67e22); box-shadow: 0 8px 18px rgba(230,126,34,.35); }
+.mail-bar button:disabled { opacity: .6; }
+.test-banner { display: none !important; } }
 @media screen {
 :root { --p:#8a4bd0; --p2:#6a2fb5; --ink:#232a47; --mut:#6e7591; --line:#e6e1f3; --ok:#14a56d; }
 body { background: linear-gradient(180deg,#e9defa 0,#f5f3fb 260px) fixed; color: var(--ink); padding: 14px 14px 48px; }
@@ -403,6 +409,7 @@ body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48
 <body>
 <div class="app-header"><img src="data:image/png;base64,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" alt=""><div><h1>Fridge Temperature</h1><small>Daily logging</small></div><div id="syncBadge" class="sync">✓ Synced</div></div>
 <div id="testBanner" class="test-banner" style="display:none"><span>\uD83E\uDDEA TEST MODE &ndash; the real data is not touched. When every fridge has a reading, a TEST email is sent and the test data is erased.</span><button onclick="endTest()">END TEST</button></div>
+<div id="mailBar" class="mail-bar"></div>
 <!-- ENTRY CARD -->
 <div class="card entry-card">
 
@@ -609,7 +616,7 @@ window.google = { script: { run: makeRunner_() } };
 function showReportPopup(rep) {
   if (!rep || (rep.status !== "sent" && rep.status !== "failed")) return;
   const ok = rep.status === "sent";
-if (!rep.test) lsSet("sent", { date: todayKey(), status: rep.status, to: rep.to || "", error: rep.error || "", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) });
+if (!rep.test) setTimeout(loadReportStatus, 500);
   document.getElementById("doneHead").style.background = ok ? "#27ae60" : "#c0392b";
   document.getElementById("doneTitle").innerText = ok ? "ALL DONE" : "ALL FRIDGES DONE";
   document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : "&#9888;&#65039;";
@@ -634,6 +641,7 @@ document.getElementById("testBanner").style.display = "flex";
 document.body.classList.add("testing");
 document.getElementById("searchCard").style.display = "none"; searchPin = "";
 if (fridgeCache) renderFridgeList(fridgeCache);
+readyTest = false; mailErr = ""; renderMailBar();
 window.scrollTo(0, 0);
 google.script.run.withSuccessHandler(function() { testStarting = false; }).withFailureHandler(function() { testStarting = false; }).clearTest();
 }
@@ -645,6 +653,7 @@ testMode = false;
 serverKeys = realState.sk; pendingKeys = realState.pk; localDone = realState.ld; realState = null;
 document.getElementById("testBanner").style.display = "none";
 document.body.classList.remove("testing");
+readyTest = false; mailErr = ""; renderMailBar();
 if (fridgeCache) renderFridgeList(fridgeCache);
 loadRound();
 }
@@ -657,46 +666,93 @@ document.getElementById("doneText").innerText = text;
 document.getElementById("doneSub").innerText = sub;
 document.getElementById("doneModal").style.display = "flex";
 }
-function startReportSend(item) {
-const test = !!(item && item.test), rec = test ? (item.recipients || []) : null;
-if (!test) lsSet("pr", { date: todayKey() }); // remembered until the email really went out
-setDonePopup("#e67e22", test ? "TEST: ALL FRIDGES DONE" : "ALL FRIDGES DONE", "&#9203;", "Sending the email...", "You can close this and keep working.");
-sendingPopup = true;
+let readyReal = false, readyTest = false, mailSending = false, mailErr = "";
+let srv = null; // today's status from the SERVER (same on every device)
+function loadReportStatus(cb) {
+  google.script.run
+  .withSuccessHandler(function(st) {
+    srv = st || null;
+    if (srv && !testMode) { readyReal = !!srv.ready && !srv.sent; }
+    renderMailBar();
+    if (cb) cb();
+  })
+  .withFailureHandler(function() { if (cb) cb(); })
+  .getReportStatus();
+}
+window.addEventListener("load", function() { loadReportStatus(); });
+setInterval(function() { if (!document.hidden && !mailSending) loadReportStatus(); }, 30000);
+document.addEventListener("visibilitychange", function() { if (!document.hidden) loadReportStatus(); });
+function isReady() { return testMode ? readyTest : readyReal; }
+function markReady(test) {
+if (test) readyTest = true; else readyReal = true;
+mailErr = "";
+renderMailBar();
+}
+function renderMailBar() {
+const bar = document.getElementById("mailBar"); if (!bar) return;
+const sent = srv && srv.sent && srv.info && srv.info.status === "sent" ? srv.info : null, sentToday = !testMode && !!sent;
+let cls = "mail-bar", html = "";
+if (isReady()) {
+const label = testMode ? "SEND TEST EMAIL" : "SEND EMAIL";
+if (mailErr) { cls += " failed"; html = "&#10060; Email NOT sent: " + escHtml(mailErr); }
+else { cls += " ready"; html = "&#9989; All fridges are complete &ndash; the email is NOT sent yet"; }
+html += '<button onclick="sendEmailNow()"' + (mailSending ? " disabled" : "") + ">" + (mailSending ? "SENDING..." : "&#128231; " + (mailErr ? "TRY AGAIN" : label)) + "</button>";
+} else if (sentToday) {
+cls += " sent"; html = "&#9989; Today's email was SENT (" + escHtml(sent.time) + ") to " + escHtml(sent.to);
+} else {
+html = "&#128231; " + (testMode ? "TEST: " : "") + "Email NOT sent &ndash; the SEND EMAIL button appears when all fridges are complete";
+}
+bar.className = cls; bar.innerHTML = html;
+}
+function sendEmailNow() {
+if (mailSending || !isReady()) return;
+const test = testMode, rec = test ? chosenRecipients() : null;
+mailSending = true; mailErr = ""; renderMailBar();
 google.script.run
 .withSuccessHandler(function(rep) {
-if (!test) lsSet("pr", null);
-if (rep && (rep.status === "sent" || rep.status === "failed")) showReportPopup(rep);
-else if (sendingPopup) closeDone();
-sendingPopup = false;
+mailSending = false;
+rep = rep || { status: "none" };
+if (rep.status === "sent") {
+if (test) readyTest = false; else readyReal = false;
+showReportPopup(rep);
 if (test === testMode) autoNewRound();
+} else if (rep.status === "failed") {
+mailErr = enErr(rep.error || "Check the EMAIL sheet");
+showReportPopup(rep);
+} else if (rep.status === "already") {
+readyReal = false; loadReportStatus();
+setDonePopup("#27ae60", "ALREADY SENT", "&#9989;", "Today's email was already sent.", "");
+} else if (rep.status === "sending") {
+setDonePopup("#e67e22", "PLEASE WAIT", "&#9203;", "The email is being sent right now.", "");
+} else {
+if (test) readyTest = false; else readyReal = false;
+setDonePopup("#c0392b", "EMAIL NOT SENT", "&#10060;", "Not all fridges are complete yet.", "Finish the round first, then press SEND EMAIL.");
+}
+renderMailBar();
 })
 .withFailureHandler(function() {
-sendingPopup = false;
-setDonePopup("#c0392b", "EMAIL NOT SENT YET", "&#9888;&#65039;", "Could not send the email now (no connection?)", test ? "Test email not sent." : "It will be sent automatically next time the app is opened with internet.");
+mailSending = false; mailErr = "No connection - try again";
+renderMailBar();
 })
 .sendPendingReport(test, rec);
 }
-window.addEventListener("load", function() {
-const pr = lsGet("pr");
-if (pr && pr.date === todayKey()) setTimeout(function() { startReportSend(null); }, 600);
-else if (pr) lsSet("pr", null);
-});
+window.addEventListener("load", function() { lsSet("pr", null); renderMailBar(); });
 function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
 // popup when the app opens: was today's email sent or not?
 function showTodayStatus() {
-const pr = lsGet("pr"); if (pr && pr.date === todayKey()) return; // an email is still being sent
-
-const rec = lsGet("sent");
-const has = rec && rec.date === todayKey();
-const ok = has && rec.status === "sent";
-const failed = has && rec.status === "failed";
-const total = fridgeCache ? fridgeCache.length : 0;
-const done = fridgeCache ? fridgeCache.filter(function(f) { return isDone(f.code); }).length : 0;
+loadReportStatus(function() { renderTodayPopup(); });
+}
+function renderTodayPopup() {
+if (!srv) { return; } // no connection: show nothing wrong, the green/orange bar still updates later
+const info = srv.info || null;
+const ok = !!srv.sent && info && info.status === "sent";
+const failed = !srv.sent && info && info.status === "failed";
+const done = srv.done || 0, total = srv.total || 0;
 document.getElementById("doneHead").style.background = ok ? "#27ae60" : failed ? "#c0392b" : "#e67e22";
 document.getElementById("doneTitle").innerText = "TODAY'S EMAIL";
 document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : failed ? "&#10060;" : "&#9203;";
-document.getElementById("doneText").innerText = ok ? "Today's email was SENT (" + rec.time + ")" : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
-document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to : failed ? enErr(rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
+document.getElementById("doneText").innerText = ok ? "Today's email was SENT" + (info.time ? " (" + info.time + ")" : "") : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
+document.getElementById("doneSub").innerText = ok ? "Sent to: " + (info.to || "") : failed ? enErr(info.error || "Check the EMAIL sheet") : (srv.ready ? "All fridges are complete - press SEND EMAIL" : (total ? done + " of " + total + " fridges done in this round" : ""));
 document.getElementById("doneModal").style.display = "flex";
 }
 window.addEventListener("load", function() { setTimeout(showTodayStatus, 300); });
@@ -985,7 +1041,10 @@ saveQueue.shift(); persistQ();
 showStatus(!r.duplicate, r.duplicate
 ? "Already saved a moment ago - duplicate ignored (" + item.barcode + ")"
 : (r.replaced ? "Updated \u2713 - temperature replaced (" : "Saved \u2713 (") + r.date + " " + r.time + " | " + item.label + ")");
-if (r.report && r.report.status === "ready") startReportSend(item); // the save is done; the email is sent in the background
+if (r.report && r.report.status === "ready") { // everything is complete: NOTHING is sent automatically, the SEND EMAIL button appears
+markReady(!!item.test);
+if (!!item.test === testMode) setDonePopup("#27ae60", "ALL FRIDGES COMPLETE", "&#9989;", "Press the SEND EMAIL button to send the report.", "The email is NOT sent yet.");
+}
 else if (r.report) { showReportPopup(r.report); if (!!item.test === testMode) autoNewRound(); }
 } else {
 failItem(item);
