@@ -355,7 +355,7 @@ color: #ffffff !important;
 .mail-bar.failed { background: #ffe8ec; color: #b3203a; border: 2px solid #f0a0ae; }
 .mail-bar button { display: block; width: 100%; margin-top: 10px; padding: 15px; border: 0; border-radius: 14px; font-size: 17px; font-weight: 800; color: #fff; background: linear-gradient(135deg,#f5a623,#e67e22); box-shadow: 0 8px 18px rgba(230,126,34,.35); }
 .mail-bar button:disabled { opacity: .6; }
-.test-banner { display: none !important; } }
+.test-banner, .count-card { display: none !important; } }
 @media screen {
 :root { --p:#8a4bd0; --p2:#6a2fb5; --ink:#232a47; --mut:#6e7591; --line:#e6e1f3; --ok:#14a56d; }
 body { background: linear-gradient(180deg,#e9defa 0,#f5f3fb 260px) fixed; color: var(--ink); padding: 14px 14px 48px; }
@@ -402,6 +402,14 @@ button:focus-visible, .fridge-item:focus-visible { outline: 3px solid rgba(138,7
 .test-banner { max-width: 750px; margin: 0 auto 14px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #fff0d1; border: 2px dashed #e6a23c; color: #8a5200; font-size: 13px; font-weight: 600; }
 .test-banner button { background: #c0392b; color: #fff; border: 0; border-radius: 10px; padding: 10px 12px; font-weight: 700; white-space: nowrap; }
 body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48,150,.09); }
+.count-card { max-width: 750px; margin: 0 auto 14px; padding: 14px 18px; border-radius: 22px; background: linear-gradient(135deg,#8a4bd0,#6a2fb5); color: #fff; box-shadow: 0 12px 28px rgba(106,47,181,.3); }
+.count-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.count-track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.28); overflow: hidden; }
+.count-fill.full { background: #7dffc0; }
+.count-fill { height: 100%; width: 0; border-radius: 999px; background: #3be08f; transition: width .35s ease; }
+.email-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 14px; border-radius: 999px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); font-size: 13px; font-weight: 700; cursor: pointer; }
+.email-pill i { width: 10px; height: 10px; border-radius: 50%; background: #f5a623; display: inline-block; }
+.email-pill.sent i { background: #3be08f; }
 .round-info { padding: 10px 16px; font-size: 13px; background: #f6f2fd; border-bottom: 1px solid var(--line); line-height: 1.5; }
 }
 </style>
@@ -410,6 +418,13 @@ body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48
 <div class="app-header"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAMAAADVRocKAAAB/lBMVEXVWZWltdztlqhtXaer1/rUqs6bat+Xo7TgFGH7WGp4i6CgauaaZt5vP39/XtW0XaKTb+Hv1dwzM0wlJ1IoLFUyOl1yPLR/P99FRXNXYH2/f785QGNAPW1aPIddYYL/HzLXOYCLS9GcaOEAAAAvOVj9/f7P9v7cEmP+M0aUWNujbOuEw/WZY93ZBFp6SLn+Jjq3DFvMs+80PWCxl+eype2r3Pfw6PevhuTDpeh/f/+md+d8vfMkLU6qVf+EPs37s7w8PWiMTdCMTNDTh7U/Pz//AP/l1PJVVVWWU+DZDmPM6fN/P7+daeP3Kkk3PGOLTdGNUNI1PGB/f3+caeIAAP8+PWtFPXWNTtOZZt2tgN7JxtfZyfHO2ut/P/9qdYySWteVZ9eeaeSdaeOeaeSqVaqnet26fPvYJnLlG1kAAH84Q2KWZdmga9myxtP7c4IAf39VRYtKVXB9xPiaZ96aZvGcZ+SNnK79QlX8ytH///8/P39HQnZATWlZaoR3R6ebuMgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0Vm8DAAAAgHRSTlP///8Q///h8v///l6jCAj/Ef8Kfqbd/whS4wTVWxHH///+/gD+/v7///79//3//v////z///7+//8C///+A///bXDR/wQB/wP///4Ez/+uqSPVAlABUihRUf/8//8E/gwSbZmvA/8H//8C/y///P8CEP//YxAh////AQQr//8K/hn7UZEAAAb4SURBVHjatZr3XxpJGIcXe6Lp/foyCA4up2IU2YABDowgoAh2jd0kGnNqTHKm/us3bSszs4Dx/UE+4M732bdM2ZlVgNziBxf447y6vbNb9DMr7u5sV7fw7xcHcQ8BRfbPWhI3/1DdQdJhZAYgTL4Ud6of8C0kay0CcjPoz+3toj+sm9J2I5BezEjmWgEkAZjp3fWHueIWxL/bi4Il9kIRy29tF+XqBqO4vUUaNAG42AM3e5G85m/ANIxoB3sXjQPQ3VQblTcQVYETHEAuCbZ2m5BniN1zbrLrAagyq43Evj4XVdLYC5AEmzstyBPEzk0w4wVoB0ddul9rRV/z611HSEAK+AUsNxl9VyaWwYEMcOCpr3kT4mJAHLwPyySgX4/FdPQh4YffOwmKIz5SfaiPjPf3B4PrPh3KCQd8wAaKj+z+J/qxBbE91WSEZSTFASTBkbQ81/otQNAnLdcjW6dWrPh/8EvyC0f67YDgU0mUwv4jKw8GILd3uyirn5ih3zFGCTFZLRVv7+VcgDjo0yX62pRx+4PPBjswoEN2td5nuqAYCViWJkA3wzM4eDaIPwu6NA3LRhooID6/5ZcB4KgNMPiMuDAq63Nh/8F83AZIgj5pB4YTDsCYR5pxGvqYCwrVr8oHUFZDdQCdGc+HKiVgQC3+qKsFgKZNsNLq54Qr3PUoXmOAGZCe1loBjJiA+nBp02kyOSBALrepqrClEMWo8UIEVXUzlyMA7IAHQQSQtFBV6gL2YDOjItN+JkDDipkZ4sEMWIL4K/yZAKq4hMQV1KdnyVcZgZ9k/+g4timdr6/CWSSuxMGcygw2CTBG2BhfH9kciCsbJMUeBEGIwqPYxPoozRvKPMiopmlN5gBi4yaYWgbMK1aEJIRmkqzZ9eZQkq0IiaMkAmj1axloV0MxUowakhIEgNjaFLE1na+P60hJZlTVkyCoojVjLJqAXH2UhD1lTlW9CQIP9BFqE7pAHyVBWVLrTWuqisxC0jhSS0oacn6GrVQRVyitzPJ+dyMsQGHQV+eBUB5nWcmofIMa34OOM3cOJnB0oEAmIwQ4ECbgTtst39mZq4piEApFMooqMXMYMABtpaGe/C1XPxiBMg0pwHSDAdr+HBgIhXpudVhJhtBDwAuA3dD80wQwNTCAAaGIjwCmUeSxPLwkgEiQBUrnEAP8Q1Z26OdJ77YNAdRJAnjuBEyqkK0qVq4GoKrWuuiKALFxalP7VwOAuAKwSXOQuYQHDVjm6gGz8BIA7S0ymQAa7NKXALDluyYBpLkTTqOATqI/LgGgCWfuMjnQsElDMFc/6f/UJKNJHzSS5VYBeNniWng1BzAmfVE7svCau/xQMS4cKtDS0bH4ba1MxYMdXvxuNBIjAQDuryDbX9kXR2jD/gAisal6QEcDzfADiPUIJa6FSbqZ4wQE9yehZw3FbQ+BkgCt0Ei3OQHBLq8ipQ+BIHfTI81M3wIowYYImXb7g7jY3hq18qlEAflQgRFko5DtQRxvJUgcHWf614bYssVyYV3qgbGVAG6AtPq3yB6yYp+i+gQQivy1zvYGHwobqmkkzPaL3tx9EBDZKdW/M0D1KSAUCa0RQOGrsOGDu2/MDakXYCEquCzRTcf8T0yfAUKRVzQPHxOChtEFJGtuqb0AZcF1hzQD7wx9A2DkYUzkQJnqM8C/YFHgwEui/x/TL73uiUTyjNBJCN8EgEUkatvWfAFSUUmEmAOv8/nQ8PBwxO7CdW6MoinmgLkxmxUE6ZhkYIDpI91hg5CnWfiR4Aco69r5rb05qfCuXLciVCI3jgHD1IVVDDjmtaqcgJp7c3weLPKCVDBHuYFS3gTkrSSM8RMwX7+9j2pVBCCDEI0QBUTkgAUjAc4Diiwv0etcD2yAY16Cs/wjls8cwqotB3leDnwc/c+iQ6J6H1iZSqrI3ZVd+q5jLkTgdrR3rIzyFGDvBy9dAEd86g/qsu5R6au9J5deh/JGP2MRKhy6R6Cs/KgxC744+kPC5xiLSiXXWNTtcKCy6NavPyzNghtluxNPXKNpj3M0PbXffvn3On3OcS8qYXuqE8fc+eAVnXF8CUf4bfUvObCuobHV5sSpOaOVzCkzolB9WwaiZTR+1ho8ckd+LlSizkJC/fnT0NBQKYLsVRubk78ZDkQrC6A+POKXBtBk9z0VZYjER2NZ8fzdtWs9itJpLCqMoToaSLWTRk289oCCeZJiXlgE6yTQph+tpE540fd6cQO1+P5bOYAZiescQIF0sWigvPBdLC9/twXHdDFVCUQPE6erbsCPr4HDaKCS+gIEwW/k5Rl6Y19S5V8DgZerNkDhB5qKK+XUonlRiwA0D5G7O29/fO/+H92r+MC6MHbc/eT+vcft58TLeQ+B/wFQf3ew4otRwQAAAABJRU5ErkJggg==" alt=""><div><h1>Fridge Temperature</h1><small>Daily logging</small></div><div id="syncBadge" class="sync">✓ Synced</div></div>
 <div id="testBanner" class="test-banner" style="display:none"><span>\uD83E\uDDEA TEST MODE &ndash; the real data is not touched. When every fridge has a reading, a TEST email is sent and the test data is erased.</span><button onclick="endTest()">END TEST</button></div>
 <div id="mailBar" class="mail-bar"></div>
+<div id="countCard" class="count-card">
+<div class="count-row"><span>&#9728;&#65039; Morning counted</span><span id="countTextM">0 / 0</span></div>
+<div class="count-track"><div id="countFillM" class="count-fill"></div></div>
+<div class="count-row" style="margin-top:12px"><span>&#127769; Afternoon counted</span><span id="countTextA">0 / 0</span></div>
+<div class="count-track"><div id="countFillA" class="count-fill"></div></div>
+<div id="emailPill" class="email-pill" onclick="showTodayStatus()"></div>
+</div>
 <!-- ENTRY CARD -->
 <div class="card entry-card">
 
@@ -535,7 +550,7 @@ body.testing .entry-card { box-shadow: 0 0 0 3px #f5a623, 0 12px 32px rgba(88,48
 <div style="padding:22px 18px;">
 <div id="doneIcon" style="font-size:60px;line-height:1;">&#9989;</div>
 <div id="doneText" style="font-size:16px;font-weight:bold;margin:14px 0 6px 0;"></div>
-<div id="doneSub" style="font-size:13px;color:#555;word-break:break-all;margin-bottom:18px;"></div>
+<div id="doneSub" style="white-space:pre-line;font-size:13px;color:#555;word-break:break-all;margin-bottom:18px;"></div>
 <button class="submit-btn" onclick="closeDone()">OK</button>
 </div></div></div>
 
@@ -616,7 +631,12 @@ window.google = { script: { run: makeRunner_() } };
 function showReportPopup(rep) {
   if (!rep || (rep.status !== "sent" && rep.status !== "failed")) return;
   const ok = rep.status === "sent";
-if (!rep.test) lsSet("sent", { date: todayKey(), status: rep.status, to: rep.to || "", error: rep.error || "", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) });
+if (!rep.test) {
+    const info = { date: todayKey(), status: rep.status, to: rep.to || "", error: rep.error || "", time: fmtTime(new Date()), count: fridgeCache ? fridgeCache.length : 0, ts: Date.now() };
+    lsSet("sent", info);
+    if (ok) { shownTs = info.ts; lsSet("shownTs", shownTs); emailInfo = info; } // the server stores it for every device until midnight
+    renderEmailPill();
+  }
   document.getElementById("doneHead").style.background = ok ? "#27ae60" : "#c0392b";
   document.getElementById("doneTitle").innerText = ok ? "ALL DONE" : "ALL FRIDGES DONE";
   document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : "&#9888;&#65039;";
@@ -635,7 +655,7 @@ if (testMode) return;
 const r = recipientsOrAsk(); if (!r) return;
 if (!confirm("START TEST MODE?\n\nScan or type like normal. When every fridge has a reading, a TEST email is sent to:\n" + r.join("\n") + "\n\nThen the test data is erased automatically. The real data is not touched.")) return;
 realState = { sk: serverKeys, pk: pendingKeys, ld: localDone };
-serverKeys = {}; pendingKeys = {}; localDone = {};
+serverKeys = {}; pendingKeys = {}; localDone = {}; testProg = { m: {}, a: {} };
 testMode = true; testStarting = true;
 document.getElementById("testBanner").style.display = "flex";
 document.body.classList.add("testing");
@@ -652,7 +672,7 @@ google.script.run.clearTest();
 testMode = false;
 serverKeys = realState.sk; pendingKeys = realState.pk; localDone = realState.ld; realState = null;
 document.getElementById("testBanner").style.display = "none";
-document.body.classList.remove("testing");
+document.body.classList.remove("testing"); updateCounted();
 readyTest = false; mailErr = ""; renderMailBar();
 if (fridgeCache) renderFridgeList(fridgeCache);
 loadRound();
@@ -725,10 +745,68 @@ renderMailBar();
 window.addEventListener("load", function() { lsSet("pr", null); renderMailBar(); });
 function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
 // popup when the app opens: was today's email sent or not?
+function fmtTime(d) { return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); }
+let emailInfo = null, shownTs = lsGet("shownTs");
+function currentSent() { // server record first (shared), else this device's record of today
+  if (emailInfo && emailInfo.status === "sent") return emailInfo;
+  const r = lsGet("sent");
+  return (r && r.date === todayKey() && r.status === "sent") ? r : null;
+}
+function renderEmailPill() {
+  const p = document.getElementById("emailPill"); if (!p) return;
+  const s = currentSent();
+  p.className = "email-pill" + (s ? " sent" : "");
+  p.innerHTML = "<i></i>" + (s ? "Email sent" + (s.time ? " &middot; " + escHtml(s.time) : "") : "Email not sent yet");
+}
+// today's MORNING (<12:00) / AFTERNOON (>=12:00) fridges: server data + what this device saved but not synced yet
+let dayProg = { m: {}, a: {} }, testProg = { m: {}, a: {} };
+function half() { return new Date().getHours() < 12 ? "m" : "a"; }
+function updateCounted() {
+  const total = fridgeCache ? fridgeCache.length : 0;
+  const P = testMode ? testProg : dayProg;
+  [["m", "M"], ["a", "A"]].forEach(function(h) {
+    const done = fridgeCache ? fridgeCache.filter(function(f) { return P[h[0]][fridgeKey(f.code)]; }).length : 0;
+    document.getElementById("countText" + h[1]).innerText = done + " / " + total;
+    const fill = document.getElementById("countFill" + h[1]);
+    fill.style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+    fill.className = "count-fill" + (total && done === total ? " full" : "");
+  });
+}
+function markProgress(code) { (testMode ? testProg : dayProg)[half()][fridgeKey(code)] = true; updateCounted(); }
+function loadProgress() {
+  if (testMode) return;
+  google.script.run.withSuccessHandler(function(p) {
+    if (testMode || !p) return;
+    const n = { m: {}, a: {} };
+    (p.morning || []).forEach(function(k) { n.m[k] = true; });
+    (p.afternoon || []).forEach(function(k) { n.a[k] = true; });
+    saveQueue.forEach(function(i) { if (!i.test) n[i.half || half()][fridgeKey(i.barcode)] = true; }); // saved here, still syncing
+    dayProg = n; updateCounted();
+  }).getDayProgress();
+}
+// pull today's email status from the server (so every device sees the same thing)
+function pollEmailStatus(first) {
+  if (document.hidden || testMode) return;
+  google.script.run
+    .withSuccessHandler(function(info) {
+      if (info && info.status === "sent") {
+        emailInfo = info;
+        lsSet("sent", { date: todayKey(), status: "sent", to: info.to, time: info.time, count: info.count, ts: info.ts });
+        renderEmailPill();
+        if (shownTs !== info.ts) { shownTs = info.ts; lsSet("shownTs", shownTs); showTodayStatus(); } // popup appears on every device
+        else if (first) showTodayStatus();
+      } else {
+        emailInfo = null; renderEmailPill();
+        if (first) showTodayStatus();
+      }
+    })
+    .withFailureHandler(function() { if (first) showTodayStatus(); })
+    .getEmailStatus();
+}
 function showTodayStatus() {
-
-const rec = lsGet("sent");
-const has = rec && rec.date === todayKey();
+if (testMode) return;
+const rec = currentSent() || lsGet("sent");
+const has = rec && rec.date ? rec.date === todayKey() : !!rec;
 const ok = has && rec.status === "sent";
 const failed = has && rec.status === "failed";
 const total = fridgeCache ? fridgeCache.length : 0;
@@ -736,11 +814,13 @@ const done = fridgeCache ? fridgeCache.filter(function(f) { return isDone(f.code
 document.getElementById("doneHead").style.background = ok ? "#27ae60" : failed ? "#c0392b" : "#e67e22";
 document.getElementById("doneTitle").innerText = "TODAY'S EMAIL";
 document.getElementById("doneIcon").innerHTML = ok ? "&#9989;" : failed ? "&#10060;" : "&#9203;";
-document.getElementById("doneText").innerText = ok ? "Today's email was SENT (" + rec.time + ")" : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
-document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to : failed ? enErr(rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
+document.getElementById("doneText").innerText = ok ? "Today's email was SENT" + (rec.time ? " (" + rec.time + ")" : "") : failed ? "Today's email was NOT sent" : "Today's email was NOT sent yet";
+document.getElementById("doneSub").innerText = ok ? "Sent to: " + rec.to + "\n" + (rec.count || total) + " fridges · Valid until midnight" : failed ? enErr(rec.error || "Check the EMAIL sheet") : (total ? done + " of " + total + " fridges done in this round" : "");
 document.getElementById("doneModal").style.display = "flex";
 }
-window.addEventListener("load", function() { setTimeout(showTodayStatus, 300); });
+window.addEventListener("load", function() { renderEmailPill(); updateCounted(); setTimeout(function() { pollEmailStatus(true); }, 300); loadProgress(); });
+setInterval(function() { pollEmailStatus(false); loadRound(); loadProgress(); }, 30000); // other devices: email status + fridges counted
+document.addEventListener("visibilitychange", function() { if (!document.hidden) { pollEmailStatus(false); loadRound(); loadProgress(); } });
 function closeDone() { document.getElementById("doneModal").style.display = "none"; }
 window.onload = function() {
 const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
@@ -845,6 +925,7 @@ if (!fridgeCache) document.getElementById("fridgeGrid").innerHTML = "<div class=
 });
 }
 function renderFridgeList(list) {
+updateCounted();
 const grid = document.getElementById("fridgeGrid");
 grid.innerHTML = "";
 if (!list.length) {
@@ -990,14 +1071,14 @@ barcode: barcode,
 temperature: temp,
 isDefrosting: isDefrosting,
 isBroken: isBroken,
-test: testMode, recipients: testMode ? chosenRecipients() : [],
+test: testMode, recipients: testMode ? chosenRecipients() : [], half: half(),
 label: (testMode ? "TEST | " : "") + barcode + " | " + fridgeType + " - " + (temp !== "" ? temp + "\u00b0C" : "N/A") + (notes.length ? " | " + notes.join(" & ") : ""),
 tries: 0
 });
 persistQ();
 // instant feedback: ready for the next fridge straight away
 showStatus(true, "Saving... (" + barcode + ")");
-markScanned(barcode);
+markScanned(barcode); markProgress(barcode);
 if (fridgeCache) renderFridgeList(fridgeCache);
 document.getElementById("barcodeInput").value = "";
 applyTypeFor("");
@@ -1022,7 +1103,7 @@ google.script.run
 .withSuccessHandler(function(r) {
 queueRunning = false;
 if (r && r.success) {
-saveQueue.shift(); persistQ();
+saveQueue.shift(); persistQ(); if (!item.test) loadProgress();
 showStatus(!r.duplicate, r.duplicate
 ? "Already saved a moment ago - duplicate ignored (" + item.barcode + ")"
 : (r.replaced ? "Updated \u2713 - temperature replaced (" : "Saved \u2713 (") + r.date + " " + r.time + " | " + item.label + ")");
